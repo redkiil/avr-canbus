@@ -1,0 +1,6 @@
+.generated_files
+.git
+avr-can-lib-master
+build
+debug
+dist
