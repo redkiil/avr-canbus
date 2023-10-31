@@ -9,7 +9,7 @@
 #define	CANMODULE_H
 
 #include <avr/io.h>
-
+#include <stdbool.h>
 /* special address description flags for the CAN_ID */
 #define CAN_EFF_FLAG 0x80000000UL /* EFF/SFF is set in the MSB */
 #define CAN_RTR_FLAG 0x40000000UL /* remote transmission request */
@@ -45,7 +45,7 @@
 
 #define ERROR_OK 0
 #define ERROR_FAIL 1
-
+#define ERROR_NOMSG 2
 static const uint8_t MCP_SIDH = 0;
 static const uint8_t MCP_SIDL = 1;
 static const uint8_t MCP_EID8 = 2;
@@ -61,12 +61,11 @@ struct can_f
     uint8_t dlc;
     uint8_t can_data[8];
 };
-
 typedef struct can_f canframe;
 
 void can_init();
 uint8_t can_send(canframe can_frame);
-void can_prepare_id(uint8_t *candata, const uint8_t ext, const uint32_t id);
+void can_prepare_id(uint8_t *candata, const bool ext, const uint32_t id);
 uint8_t can_read_message(uint8_t rxsdh, canframe *can_frame);
 uint8_t can_read(canframe *can_frame);
 #endif

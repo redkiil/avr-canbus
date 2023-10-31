@@ -70,7 +70,7 @@ uint8_t spi_readstatus()
 {
     spi_select();
     spi_write(CAN_RD_STATUS);
-    uint8_t rd = spi_write(0xFF);
+    uint8_t rd = spi_write(0x00);
     spi_deselect();
     return rd;
 }

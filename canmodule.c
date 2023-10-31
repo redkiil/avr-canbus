@@ -5,6 +5,7 @@
 #include <util/delay.h>
 #include <string.h>
 
+
 uint8_t dummy;
 
 void can_init(){
@@ -20,15 +21,15 @@ void can_init(){
     spi_writeregisters(TXB2CTRL, zeros, 14);
     
     
-    spi_writeregister(RXB0CTRL, 0);
+    spi_writeregister(RXB0CTRL, 0x60);
     spi_writeregister(RXB1CTRL, 0);
 
-    spi_writeregister(CANINTE, RX0IF | RX1IF | ERRIF | MERRF);
+    spi_writeregister(CANINTE, 0x1);
     
     
     //
-    spi_bitmodify(RXB0CTRL,0x67,0x04);
-    spi_bitmodify(RXB1CTRL,0x67,0x01);
+    //spi_bitmodify(RXB0CTRL,0x67,0x00);
+    //spi_bitmodify(RXB1CTRL,0x67,0x00);
     //
     
     
@@ -52,7 +53,7 @@ void can_init(){
 }
 uint8_t can_send(canframe can_frame){
 
-    uint8_t ext = (can_frame.id & CAN_EFF_FLAG);
+    bool ext = (can_frame.id & CAN_EFF_FLAG);
     uint8_t rtr = (can_frame.id & CAN_RTR_FLAG);
     uint32_t id = (can_frame.id & (ext ? CAN_EFF_MASK : CAN_SFF_MASK));
     uint8_t data[13];
@@ -70,7 +71,7 @@ uint8_t can_send(canframe can_frame){
     }
     return 0;
 }
-void can_prepare_id(uint8_t *candata, const uint8_t ext, const uint32_t id)
+void can_prepare_id(uint8_t *candata, const bool ext, const uint32_t id)
 {
     uint16_t canid = (uint16_t)(id & 0x0FFFF);
 
@@ -123,11 +124,14 @@ uint8_t can_read_message(uint8_t rxsdh,canframe *can_frame)
 }
 uint8_t can_read(canframe *can_frame)
 {
+    uint8_t er = 0;
     uint8_t st = spi_readstatus();
     if(st & STAT_RX0IF){
-        can_read_message(RXB0SIDH, can_frame);
+        er = can_read_message(RXB0SIDH, can_frame);
     }else if(st & STAT_RX1IF){
-        can_read_message(RXB1SIDH, can_frame);
+        er = can_read_message(RXB1SIDH, can_frame);
+    }else{
+        er = ERROR_NOMSG;
     }
-    return 0;
+    return er;
 }
